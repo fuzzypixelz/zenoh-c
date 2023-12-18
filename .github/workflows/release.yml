@@ -25,7 +25,8 @@ jobs:
     name: Code checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone this repository
+        uses: actions/checkout@v4
 
       - name: Install Rust toolchain
         run: rustup component add rustfmt clippy
@@ -113,9 +114,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 500 # NOTE: get long history for git-version crate to correctly compute a version
+
       - name: Fetch Git tags # NOTE: workaround for https://github.com/actions/checkout/issues/290
         shell: bash
         run: git fetch --tags --force
+
       - name: Install prerequisites
         shell: bash
         run: |
@@ -204,7 +207,7 @@ jobs:
           esac
 
       - name: "Upload packages"
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.job.target }}
           path: |
@@ -218,13 +221,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download result of previous builds
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: ARTIFACTS
+
       - name: Publish as github release
         uses: softprops/action-gh-release@v1
         with:
           files: ARTIFACTS/*/*.*
+
       - name: Publish to download.eclipse.org/zenoh
         env:
           SSH_TARGET: genie.zenoh@projects-storage.eclipse.org
