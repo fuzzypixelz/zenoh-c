@@ -34,11 +34,13 @@ export GIT_COMMITTER_EMAIL=$git_user_email
 printf '%s' "$version" > version.txt
 # Propagate version change to Cargo.toml and Cargo.toml.in
 cmake . -DZENOHC_BUILD_IN_SOURCE_TREE=TRUE -DCMAKE_BUILD_TYPE=Release
+# Read Cargo version
+cargo_version=$(toml get --raw Cargo.toml "package.version")
 # Update Debian dependency of libzenohc-dev
-toml_set_in_place Cargo.toml "package.metadata.deb.variants.libzenohc-dev.depends" "libzenohc (=$version)"
-toml_set_in_place Cargo.toml.in "package.metadata.deb.variants.libzenohc-dev.depends" "libzenohc (=$version)"
+toml_set_in_place Cargo.toml "package.metadata.deb.variants.libzenohc-dev.depends" "libzenohc (=$cargo_version)"
+toml_set_in_place Cargo.toml.in "package.metadata.deb.variants.libzenohc-dev.depends" "libzenohc (=$cargo_version)"
 
-git commit version.txt Cargo.toml Cargo.toml.in Cargo.lock -m "chore: Bump version to $version"
+git commit version.txt Cargo.toml Cargo.toml.in Cargo.lock -m "chore: Bump version to \`$version\`"
 
 # Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
 if [[ "$bump_deps_pattern" != '' ]]; then
@@ -58,7 +60,7 @@ if [[ "$bump_deps_pattern" != '' ]]; then
   cargo check
 
   if [[ -n $bump_deps_version || -n $bump_deps_branch ]]; then
-    git commit Cargo.toml Cargo.toml.in Cargo.lock -m "chore: Bump $bump_deps_pattern version to $bump_deps_version"
+    git commit Cargo.toml Cargo.toml.in Cargo.lock -m "chore: Bump \`$bump_deps_pattern\` dependencies' version to \`$bump_deps_version\`"
   else
     echo "warn: no changes have been made to any dependencies matching $bump_deps_pattern"
   fi
