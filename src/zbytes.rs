@@ -136,7 +136,7 @@ pub unsafe extern "C" fn z_bytes_to_slice(
 ) -> z_result_t {
     let payload = this.as_rust_type_ref();
     dst.as_rust_type_mut_uninit()
-        .write(payload.to_bytes().into_owned().into());
+        .write(CSliceOwned::from(Box::<[u8]>::from(payload.to_bytes())));
     result::Z_OK
 }
 
